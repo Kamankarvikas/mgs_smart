@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MGS SmartCredit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    :root {
+      --color-primary: 239 68 68; /* red-500 */
+      --color-primary-light: 248 113 113; /* red-400 */
+      --color-primary-dark: 220 38 38; /* red-600 */
+      --color-primary-foreground: 255 255 255;
+      --color-primary-bg-active: 254 226 226; /* red-100 */
+      --color-primary-bg-hover: 254 242 242; /* red-50 */
+    }
+  </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
+                light: 'rgb(var(--color-primary-light) / <alpha-value>)',
+                dark: 'rgb(var(--color-primary-dark) / <alpha-value>)',
+                foreground: 'rgb(var(--color-primary-foreground) / <alpha-value>)'
+              },
+              'primary-bg-active': 'rgb(var(--color-primary-bg-active) / <alpha-value>)',
+              'primary-bg-hover': 'rgb(var(--color-primary-bg-hover) / <alpha-value>)',
+              secondary: '#64748b', // slate-500
+              background: '#f1f5f9', // slate-100
+              surface: '#ffffff',
+              'on-surface': '#1e293b', // slate-800
+            },
+            borderRadius: {
+              'lg': '0.75rem',
+              'xl': '1rem',
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "recharts": "https://esm.sh/recharts@^3.1.2",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.8.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.539.0",
+    "react/": "https://esm.sh/react@^19.1.1/",
+    "react": "https://esm.sh/react@^19.1.1",
+    "react-router": "https://esm.sh/react-router@^7.8.1"
+  }
+}
+</script>
+</head>
+  <body class="bg-background text-on-surface">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
