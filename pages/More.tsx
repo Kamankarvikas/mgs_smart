@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, Button, Input, Modal } from '../components/ui';
 import { TeamMember, Conversation, Message, LetterTemplate } from '../types';
@@ -80,11 +78,46 @@ const DeleteLetterModal: React.FC<{ isOpen: boolean; onClose: () => void; onConf
     </Modal>
 );
 
+const LetterPreviewModal: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    template: LetterTemplate | null;
+}> = ({ isOpen, onClose, template }) => {
+    if (!isOpen || !template) return null;
+
+    return (
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title={template.title}
+            footer={<Button onClick={onClose}>Close</Button>}
+        >
+            <div className="space-y-4">
+                <div>
+                    <p className="text-sm font-medium text-slate-500">Category</p>
+                    <p className="font-semibold">{template.category}</p>
+                </div>
+                <div>
+                    <p className="text-sm font-medium text-slate-500">Description</p>
+                    <p className="text-slate-700">{template.description}</p>
+                </div>
+                <div className="pt-4 border-t border-slate-200/80">
+                    <p className="text-sm font-medium text-slate-500 mb-2">Content</p>
+                    <div className="max-h-64 overflow-y-auto bg-slate-50 p-4 rounded-md border border-slate-200/80">
+                        <pre className="text-sm text-slate-800 whitespace-pre-wrap font-sans">{template.content}</pre>
+                    </div>
+                </div>
+            </div>
+        </Modal>
+    );
+};
+
 export const LettersPage: React.FC = () => {
   const [templates, setTemplates] = useState<LetterTemplate[]>(mockLetterTemplates);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [templateToEdit, setTemplateToEdit] = useState<LetterTemplate | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<LetterTemplate | null>(null);
+  const [templateToPreview, setTemplateToPreview] = useState<LetterTemplate | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
@@ -127,6 +160,14 @@ export const LettersPage: React.FC = () => {
   const handleCloseModal = () => {
       setIsModalOpen(false);
       setTemplateToEdit(null);
+  };
+  
+  const handleOpenPreview = (template: LetterTemplate) => {
+    setTemplateToPreview(template);
+  };
+
+  const handleClosePreview = () => {
+    setTemplateToPreview(null);
   };
 
   const handleSaveTemplate = (templateData: LetterTemplate) => {
@@ -185,18 +226,18 @@ export const LettersPage: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-200/80">
                     {paginatedTemplates.map(template => (
-                        <tr key={template.id} className="hover:bg-slate-50">
+                        <tr key={template.id} className="hover:bg-slate-50 cursor-pointer" onClick={() => handleOpenPreview(template)}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{template.title}</td>
                             <td className="px-6 py-4 whitespace-nowrap"><span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800">{template.category}</span></td>
                             <td className="px-6 py-4 text-sm text-slate-500 max-w-sm truncate">{template.description}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div className="relative inline-block text-left" ref={openActionMenu === template.id ? actionMenuRef : null}>
-                                    <Button variant="ghost" size="sm" onClick={() => setOpenActionMenu(openActionMenu === template.id ? null : template.id)}><MoreVertical size={16}/></Button>
+                                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setOpenActionMenu(openActionMenu === template.id ? null : template.id); }}><MoreVertical size={16}/></Button>
                                     {openActionMenu === template.id && (
                                         <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
                                             <div className="py-1" role="menu" aria-orientation="vertical">
-                                                <button onClick={() => handleOpenModal(template)} className="w-full text-left flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem"><Edit size={14} className="mr-2" /> Edit</button>
-                                                <button onClick={() => { setTemplateToDelete(template); setOpenActionMenu(null); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50" role="menuitem"><Trash2 size={14} className="mr-2" /> Delete</button>
+                                                <button onClick={(e) => { e.stopPropagation(); handleOpenModal(template); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem"><Edit size={14} className="mr-2" /> Edit</button>
+                                                <button onClick={(e) => { e.stopPropagation(); setTemplateToDelete(template); setOpenActionMenu(null); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50" role="menuitem"><Trash2 size={14} className="mr-2" /> Delete</button>
                                             </div>
                                         </div>
                                     )}
@@ -221,6 +262,7 @@ export const LettersPage: React.FC = () => {
 
       <LetterTemplateModal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleSaveTemplate} templateToEdit={templateToEdit} />
       {templateToDelete && <DeleteLetterModal isOpen={!!templateToDelete} onClose={() => setTemplateToDelete(null)} onConfirm={handleDelete} templateTitle={templateToDelete.title} />}
+      <LetterPreviewModal isOpen={!!templateToPreview} onClose={handleClosePreview} template={templateToPreview} />
     </div>
   );
 };
