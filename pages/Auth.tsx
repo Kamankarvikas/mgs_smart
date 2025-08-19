@@ -69,7 +69,7 @@ const OnboardingStep: React.FC<{ step: number; title: string; description: strin
 export const OnboardingPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const navigate = useNavigate();
-  const totalSteps = 3;
+  const totalSteps = 4;
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, totalSteps));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
@@ -88,35 +88,56 @@ export const OnboardingPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-1">
             <div className="space-y-6">
-                <OnboardingStep step={1} title="Company Info" description="Tell us about your business." isActive={currentStep === 1} isCompleted={currentStep > 1} />
-                <OnboardingStep step={2} title="Owner Info" description="Provide personal details." isActive={currentStep === 2} isCompleted={currentStep > 2} />
-                <OnboardingStep step={3} title="Compliance" description="Complete necessary legal steps." isActive={currentStep === 3} isCompleted={false} />
+                <OnboardingStep step={1} title="Create Account" description="Set your login details." isActive={currentStep === 1} isCompleted={currentStep > 1} />
+                <OnboardingStep step={2} title="Company Info" description="Tell us about your business." isActive={currentStep === 2} isCompleted={currentStep > 2} />
+                <OnboardingStep step={3} title="Owner Info" description="Provide personal details." isActive={currentStep === 3} isCompleted={currentStep > 3} />
+                <OnboardingStep step={4} title="Compliance" description="Complete necessary legal steps." isActive={currentStep === 4} isCompleted={currentStep > 4} />
             </div>
           </div>
           <div className="md:col-span-2">
             <Card className="min-h-[500px] flex flex-col">
                 <div className="flex-grow">
-              {currentStep === 1 && <CompanyInfoStep />}
-              {currentStep === 2 && <OwnerInfoStep />}
-              {currentStep === 3 && <ComplianceStep />}
+              {currentStep === 1 && <CreateAccountStep />}
+              {currentStep === 2 && <CompanyInfoStep />}
+              {currentStep === 3 && <OwnerInfoStep />}
+              {currentStep === 4 && <ComplianceStep />}
                 </div>
               <div className="mt-6 pt-6 border-t border-slate-200 flex justify-between items-center">
-                {currentStep > 1 && <Button variant="outline" onClick={prevStep}><ChevronLeft size={16} className="mr-1" /> Back</Button>}
-                <div className="flex-grow"></div>
+                {currentStep > 1 ? (
+                   <Button variant="outline" onClick={prevStep}><ChevronLeft size={16} className="mr-1" /> Back</Button>
+                ) : <div />}
+                
                 {currentStep < totalSteps && <Button onClick={nextStep}>Next Step <ChevronRight size={16} className="ml-1" /></Button>}
                 {currentStep === totalSteps && <Button onClick={finishOnboarding}>Finish Setup <CheckCircle size={16} className="ml-1" /></Button>}
               </div>
             </Card>
           </div>
         </div>
+         <div className="mt-6 text-center">
+          <Link to="/" className="text-sm font-medium text-slate-600 hover:text-primary flex items-center justify-center group">
+            <ArrowLeft size={16} className="mr-1 transition-transform group-hover:-translate-x-1" />
+            Back to Home Page
+          </Link>
+        </div>
       </div>
     </div>
   );
 };
 
+const CreateAccountStep: React.FC = () => (
+    <div>
+        <h3 className="text-lg font-semibold mb-4">Step 1: Create Your Account</h3>
+        <div className="space-y-4">
+            <Input label="Email Address" type="email" placeholder="you@example.com" icon={<Mail size={16} className="text-slate-400" />} />
+            <Input label="Password" type="password" placeholder="••••••••" icon={<Lock size={16} className="text-slate-400" />} />
+            <Input label="Confirm Password" type="password" placeholder="••••••••" icon={<Lock size={16} className="text-slate-400" />} />
+        </div>
+    </div>
+);
+
 const CompanyInfoStep: React.FC = () => (
     <div>
-        <h3 className="text-lg font-semibold mb-4">Step 1: Company Information</h3>
+        <h3 className="text-lg font-semibold mb-4">Step 2: Company Information</h3>
         <div className="space-y-4">
             <div className="flex items-center gap-4">
                 <div className="w-24 h-24 bg-slate-100 rounded-lg flex items-center justify-center">
@@ -138,7 +159,7 @@ const CompanyInfoStep: React.FC = () => (
 
 const OwnerInfoStep: React.FC = () => (
     <div>
-        <h3 className="text-lg font-semibold mb-4">Step 2: Owner Information</h3>
+        <h3 className="text-lg font-semibold mb-4">Step 3: Owner Information</h3>
         <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="First Name" placeholder="John" />
@@ -172,7 +193,7 @@ const OwnerInfoStep: React.FC = () => (
 
 const ComplianceStep: React.FC = () => (
     <div>
-        <h3 className="text-lg font-semibold mb-4">Step 3: Compliance</h3>
+        <h3 className="text-lg font-semibold mb-4">Step 4: Compliance</h3>
         <div className="space-y-6">
             <div className="relative flex items-start">
                 <div className="flex items-center h-5">
