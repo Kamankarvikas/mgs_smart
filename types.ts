@@ -127,3 +127,23 @@ export interface LetterTemplate {
   description: string;
   content: string;
 }
+
+// --- SUPERADMIN TYPES ---
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  price: number; // per month
+  features: string[];
+  clientLimit: number;
+  userLimit: number;
+}
+
+export interface Business {
+  id: string;
+  name: string;
+  ownerEmail: string;
+  planId: string;
+  status: 'Active' | 'Inactive' | 'Trial';
+  createdDate: string;
+  userCount: number;
+}

@@ -32,8 +32,9 @@ export const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', s
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   icon?: React.ReactNode;
+  helperText?: string;
 }
-export const Input: React.FC<InputProps> = ({ label, id, icon, className = '', ...props }) => {
+export const Input: React.FC<InputProps> = ({ label, id, icon, className = '', helperText, ...props }) => {
   return (
     <div className="w-full">
       {label && <label htmlFor={id} className="block text-sm font-medium text-slate-600 mb-1">{label}</label>}
@@ -45,6 +46,7 @@ export const Input: React.FC<InputProps> = ({ label, id, icon, className = '', .
           {...props}
         />
       </div>
+      {helperText && <p className="mt-2 text-sm text-slate-500">{helperText}</p>}
     </div>
   );
 };

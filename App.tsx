@@ -1,14 +1,29 @@
+
 import React, { useState, createContext, useContext, useMemo, useEffect, useCallback } from 'react';
 import { Routes, Route, Navigate } from 'react-router';
-import { HashRouter } from 'react-router-dom';
+import { HashRouter, useLocation } from 'react-router-dom';
 import { LoginPage, OnboardingPage } from './pages/Auth';
 import NewLandingPage from './pages/NewLandingPage';
 import DashboardLayout from './components/layout';
+import SuperAdminLayout from './components/SuperAdminLayout';
+import ClientLayout from './components/ClientLayout';
 import DashboardPage from './pages/Dashboard';
 import LeadsPage from './pages/Leads';
 import ClientsPage from './pages/Clients';
 import { LettersPage, InboxPage, TeamPage, SettingsPage } from './pages/More';
 import CompanyProfilePage from './pages/Company';
+import SuperAdminDashboard from './pages/superadmin/Dashboard';
+import BusinessesPage from './pages/superadmin/Businesses';
+import PlansPage from './pages/superadmin/Plans';
+import SuperAdminSettingsPage from './pages/superadmin/Settings';
+import ClientOnboardingPage from './pages/client/Onboarding';
+import ClientDashboardPage from './pages/client/Dashboard';
+import ClientScoresPage from './pages/client/Scores';
+import ClientDisputesPage from './pages/client/Disputes';
+import ClientMessagesPage from './pages/client/Messages';
+import ClientAccountPage from './pages/client/Account';
+import ClientBillingPage from './pages/client/Billing';
+
 
 // --- APP SETTINGS MANAGEMENT ---
 export interface AppSettings {
@@ -123,9 +138,15 @@ const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
 // --- AUTH MANAGEMENT ---
 
+interface User {
+  email: string;
+  role: 'admin' | 'superadmin' | 'client';
+}
+
 interface AuthContextType {
+  user: User | null;
   isAuthenticated: boolean;
-  login: () => void;
+  login: (email: string) => void;
   logout: () => void;
 }
 
@@ -140,23 +161,69 @@ export const useAuth = () => {
 };
 
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
-  const login = () => setIsAuthenticated(true);
-  const logout = () => setIsAuthenticated(false);
+  const login = (email: string) => {
+    const lowerEmail = email.toLowerCase();
+    if (lowerEmail === 'superadmin@mgssmartcredit.com') {
+      setUser({ email, role: 'superadmin' });
+    } else if (lowerEmail === 'client@example.com') {
+      setUser({ email, role: 'client' });
+    } else {
+      setUser({ email, role: 'admin' });
+    }
+  };
+  const logout = () => {
+    // Clear client onboarding status on logout for demo purposes
+    if (user?.role === 'client') {
+      localStorage.removeItem('clientOnboardingComplete');
+    }
+    setUser(null);
+  };
 
   const value = useMemo(() => ({
-    isAuthenticated,
+    user,
+    isAuthenticated: !!user,
     login,
     logout,
-  }), [isAuthenticated]);
+  }), [user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  const { isAuthenticated, user } = useAuth();
+  return isAuthenticated && user?.role === 'admin' ? <>{children}</> : <Navigate to="/login" />;
+};
+
+const SuperAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { isAuthenticated, user } = useAuth();
+    return isAuthenticated && user?.role === 'superadmin' ? <>{children}</> : <Navigate to="/login" />;
+};
+
+const ClientRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
+  
+  // For demo purposes, we use localStorage to track onboarding status.
+  const onboardingComplete = localStorage.getItem('clientOnboardingComplete') === 'true';
+
+  if (!isAuthenticated || user?.role !== 'client') {
+    return <Navigate to="/login" />;
+  }
+
+  // If client is not onboarded, redirect them to the onboarding flow.
+  // We must prevent a redirect loop if they are already on the onboarding page.
+  if (!onboardingComplete && location.pathname !== '/client/onboarding') {
+    return <Navigate to="/client/onboarding" />;
+  }
+
+  // If client IS onboarded and tries to access the onboarding page, redirect to dashboard.
+  if (onboardingComplete && location.pathname === '/client/onboarding') {
+    return <Navigate to="/client/dashboard" />;
+  }
+  
+  return <>{children}</>;
 };
 
 function App() {
@@ -185,6 +252,38 @@ function App() {
                 <Route path="team" element={<TeamPage />} />
                 <Route path="company" element={<CompanyProfilePage />} />
                 <Route path="settings" element={<SettingsPage />} />
+              </Route>
+
+              <Route path="/superadmin" element={
+                <SuperAdminRoute>
+                  <SuperAdminLayout />
+                </SuperAdminRoute>
+              }>
+                 <Route index element={<Navigate to="dashboard" />} />
+                 <Route path="dashboard" element={<SuperAdminDashboard />} />
+                 <Route path="businesses" element={<BusinessesPage />} />
+                 <Route path="plans" element={<PlansPage />} />
+                 <Route path="settings" element={<SuperAdminSettingsPage />} />
+              </Route>
+
+              <Route path="/client/onboarding" element={
+                  <ClientRoute>
+                      <ClientOnboardingPage />
+                  </ClientRoute>
+              } />
+
+              <Route path="/client" element={
+                <ClientRoute>
+                  <ClientLayout />
+                </ClientRoute>
+              }>
+                  <Route index element={<Navigate to="dashboard" />} />
+                  <Route path="dashboard" element={<ClientDashboardPage />} />
+                  <Route path="scores" element={<ClientScoresPage />} />
+                  <Route path="disputes" element={<ClientDisputesPage />} />
+                  <Route path="messages" element={<ClientMessagesPage />} />
+                  <Route path="billing" element={<ClientBillingPage />} />
+                  <Route path="account" element={<ClientAccountPage />} />
               </Route>
               
               <Route path="*" element={<Navigate to="/" />} />

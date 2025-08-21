@@ -9,11 +9,21 @@ import { Card, Input, Button } from '../components/ui';
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [email, setEmail] = useState('admin@mgssmartcredit.com');
+  const [password, setPassword] = useState('password');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    login();
-    navigate('/app/dashboard');
+    login(email);
+    const lowerEmail = email.toLowerCase();
+    if (lowerEmail === 'superadmin@mgssmartcredit.com') {
+      navigate('/superadmin/dashboard');
+    } else if (lowerEmail === 'client@example.com') {
+      // The ClientRoute component will handle redirecting to onboarding or dashboard
+      navigate('/client/dashboard');
+    } else {
+      navigate('/app/dashboard');
+    }
   };
 
   return (
@@ -22,11 +32,27 @@ export const LoginPage: React.FC = () => {
         <div className="flex flex-col items-center mb-6">
           <Building2 size={40} className="text-primary mb-2" />
           <h2 className="text-2xl font-bold text-center">Welcome Back</h2>
-          <p className="text-slate-500">Sign in to manage your business.</p>
+          <p className="text-slate-500">Sign in to your account.</p>
         </div>
         <form onSubmit={handleLogin} className="space-y-4">
-          <Input id="email" type="email" label="Email" placeholder="you@example.com" icon={<Mail size={16} className="text-slate-400" />} defaultValue="admin@mgssmartcredit.com" />
-          <Input id="password" type="password" label="Password" placeholder="••••••••" icon={<Lock size={16} className="text-slate-400" />} defaultValue="password" />
+          <Input 
+            id="email" 
+            type="email" 
+            label="Email" 
+            placeholder="you@example.com" 
+            icon={<Mail size={16} className="text-slate-400" />} 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Input 
+            id="password" 
+            type="password" 
+            label="Password" 
+            placeholder="••••••••" 
+            icon={<Lock size={16} className="text-slate-400" />} 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-primary focus:ring-primary border-slate-300 rounded" />
@@ -38,6 +64,14 @@ export const LoginPage: React.FC = () => {
           </div>
           <Button type="submit" className="w-full">Sign In</Button>
         </form>
+         <div className="mt-4 text-center text-xs p-2 bg-slate-100 rounded-lg">
+          <p className="text-slate-600">
+            Hint: Use password <strong className="text-primary">password</strong> and try these emails: <br/>
+            <strong className="text-primary">admin@mgssmartcredit.com</strong> (Admin View)<br/>
+            <strong className="text-primary">superadmin@mgssmartcredit.com</strong> (Superadmin View)<br/>
+            <strong className="text-primary">client@example.com</strong> (Client View)
+          </p>
+        </div>
         <p className="mt-6 text-center text-sm text-slate-500">
           Not a member? <Link to="/onboarding" className="font-medium text-primary hover:text-primary-dark">Start your free trial</Link>
         </p>
